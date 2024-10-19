@@ -16,7 +16,12 @@ module rx_fsm#(
     
     // statistics counters 
     output logic  [15: 0]     stat_packet_vld_cnt, 
-    output logic  [15: 0]     stat_packet_err_cnt
+    output logic  [15: 0]     stat_packet_err_cnt,
+
+    // write data
+    output  logic [79:0]               wr_data, 
+    output  logic [7:0]                wr_addr, 
+    output  logic                      wr_enabl
 );
 
 // types definitions 
@@ -44,6 +49,9 @@ always_ff @(posedge clk_in)
         stat_packet_vld_cnt <= '0;
         stat_packet_err_cnt <= '0;
         n <= 0;
+        wr_enabl <= 1'b0;
+        wr_addr  <= '0;
+        wr_data <= '0;
     end
     else
     begin
@@ -60,7 +68,8 @@ always_ff @(posedge clk_in)
                 begin
                     state <= IDLE;
                     n <= 0;
-                end           
+                end      
+                wr_enabl <= 1'b0;    
             end
             PCK_SFD:  
             begin
@@ -101,9 +110,18 @@ always_ff @(posedge clk_in)
             end
             PCK_SIZE: 
             begin
-                state <= (size_buff >= C_SIZE_MIN) ? PCK_PAYLOAD : PCK_WAIT;
-                data_buff[0] <= rxd_in;
-                n <= 1;
+                if(size_buff >= C_SIZE_MIN)
+                begin
+                    state <= PCK_PAYLOAD;
+                    data_buff[0] <= rxd_in;
+                    n <= 1;
+                end
+                else
+                begin
+                    state <= PCK_WAIT;
+                    n <= 0;
+                end
+                
             end
             PCK_PAYLOAD: 
             begin
@@ -117,6 +135,9 @@ always_ff @(posedge clk_in)
                     state <= rxer_in ? PCK_WAIT : PCK_FCS;
                     fcs_buff <= rxd_in;
                     checksum <= calculate_checksum({packet_type_buff[0], packet_type_buff[1]}, size_buff, data_buff);
+                    wr_enabl <= 1'b1;
+                    wr_data <= {data_buff[0], data_buff[1], data_buff[2], data_buff[3], data_buff[4], 
+                                data_buff[5], data_buff[6], data_buff[7], data_buff[8], data_buff[9]};
                     n <= 0;
                 end  
             end
@@ -133,6 +154,9 @@ always_ff @(posedge clk_in)
                     packet_err <= 1'b1;
                 end
                 state <= PCK_WAIT;
+                wr_enabl <= '0;
+                wr_data  <= '0;
+                wr_addr  <= wr_addr + 8'h4;
             end
             PCK_WAIT:
             begin
@@ -147,6 +171,8 @@ always_ff @(posedge clk_in)
                 
                 packet_vld <= 1'b0;
                 packet_err <= 1'b0;
+                wr_enabl <= 1'b0;
+                wr_data <= '0;
                 state <= rxdv_in ? PCK_WAIT : IDLE;
             end
             default:  state <= IDLE;
@@ -158,7 +184,7 @@ always_ff @(posedge clk_in)
  function logic [7:0] calculate_checksum(
     input logic [15:0] type_field,    
     input logic [7:0] size_field,     
-    input logic [7:0] payload[]
+    input logic [7:0] payload[10]
 );
     logic [31:0] sum;  // Use a wider register to accumulate the sum
     int i;
@@ -169,7 +195,7 @@ always_ff @(posedge clk_in)
     sum += type_field[7:0];   
     sum += size_field;
 
-    for (i = 0; i < size_field; i++)
+    for (i = 0; i < 10; i++)
     begin
         sum += payload[i];
     end

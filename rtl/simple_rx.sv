@@ -43,17 +43,19 @@ module simple_rx #(
   logic [7:0] checksum;
   logic packet_vld, packet_err;
    
-
+  wire [7 :0] wr_addr, rd_addr;
+  wire [79:0] wr_data, rd_data;
+  wire wr_enabl;
 
 
  /* pozostaly kod 
  */ 
 rx_fsm #(
-  .C_MEM_SIZE_LOG2(9),                // Default parameter values
-  .MAX_PACKET_CNT_VAL(20),
-  .C_SFD(32'h5544557F),
-  .C_PACKET_TYPE(16'h1234),
-  .C_SIZE_MIN(8'h08)
+  .C_MEM_SIZE_LOG2    (C_MEM_SIZE_LOG2),
+  .MAX_PACKET_CNT_VAL (MAX_PACKET_CNT_VAL),
+  .C_SFD              (C_SFD),
+  .C_PACKET_TYPE      (C_PACKET_TYPE),
+  .C_SIZE_MIN         (C_SIZE_MIN)
 ) u_rx_fsm (
   .clk_in(clk_in),                     
   .rst_n_in(rst_n_in), 
@@ -64,8 +66,43 @@ rx_fsm #(
   
   // statistics counters 
   .stat_packet_vld_cnt(stat_packet_vld_cnt), 
-  .stat_packet_err_cnt(stat_packet_err_cnt)
+  .stat_packet_err_cnt(stat_packet_err_cnt),
+
+
+  .wr_data(wr_data),
+  .wr_addr(wr_addr),
+  .wr_enabl(wr_enabl)
 );
+
+data_mem #(
+    .ADDR_WIDTH(8),        
+    .DATA_WIDTH(80)         
+)
+data_mem_inst (
+    .clk_in(clk_in),
+    .rst_n_in(rst_n_in),
+    .wr_data(wr_data),
+    .wr_addr(wr_addr),
+    .wr_enabl(wr_enabl),
+    .rd_data(rd_data),
+    .rd_addr(rd_addr)
+);
+
+
+output_controller #(
+    .ADDR_WIDTH(8),
+    .DATA_WIDTH(80)
+  ) u_output_controller (
+    .clk_in(clk_in),
+    .rst_n_in(rst_n_in),
+    .rd_data(rd_data),
+    .rd_addr(rd_addr),
+    .tdata_out(tdata_out),
+    .tvalid_out(tvalid_out),
+    .tlast_out(tlast_out),
+    .tready_in(tready_in)
+  );
+
 
 
 
