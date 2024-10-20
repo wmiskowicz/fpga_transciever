@@ -8,12 +8,18 @@ module simple_rx_tb;
     int i;
 
     // Packet data
-    logic [7:0] TEST_SFD_OK [3:0] = '{8'h55, 8'h44, 8'h55, 8'h7F};
-    logic [7:0] TEST_TYPE_OK [1:0] = '{8'h12, 8'h34};
-    logic [7: 0] TEST_SIZE_OK = 8'hA; //min 0x8
-    logic [7:0] TEST_PAYLOAD [SIZE-1:0] = '{8'h11, 8'h22, 8'h33, 8'h44, 8'h55, 8'h66, 8'h77, 8'h88, 8'h99, 8'haa}; 
-    logic [7:0] TEST_FCS = calculate_checksum({TEST_TYPE_OK[1], TEST_TYPE_OK[0]}, TEST_SIZE_OK, TEST_PAYLOAD);
-    
+    logic [7:0] TEST_SFD_OK  [3:0] = '{8'h55, 8'h55, 8'h55, 8'h7F};
+    logic [7:0] TEST_SFD_ERR [3:0] = '{8'h22, 8'h44, 8'h55, 8'h7F};
+
+    logic [7:0] TEST_TYPE_OK  [1:0] = '{8'h12, 8'h34};
+    logic [7:0] TEST_TYPE_ERR [1:0] = '{8'haa, 8'h34};
+
+    logic [7:0] TEST_SIZE_OK  = 8'hA; //min 0x8
+    logic [7:0] TEST_SIZE_ERR = 8'h3;
+
+    logic [7:0] test_payload [SIZE-1:0] = '{8'h11, 8'h22, 8'h33, 8'h44, 8'h55, 8'h66, 8'h77, 8'h88, 8'h99, 8'haa}; 
+    logic [7:0] test_fcs_ok = '0;    
+    logic [7:0] test_fcs_err = '1;    
 
   
     // Clock and reset signals
@@ -35,9 +41,6 @@ module simple_rx_tb;
     logic [15:0] stat_packet_vld_cnt;
     logic [15:0] stat_packet_err_cnt;
 
-    
-  
-    // Instantiate the DUT (Device Under Test)
     simple_rx #(
       .G_MEM_SIZE(G_MEM_SIZE)
     ) dut (
@@ -71,63 +74,27 @@ module simple_rx_tb;
       i = 0;
 
       init_reset();
-      
-      rxdv_in = '1;
-      for (i = 3; i >= 0; i--)
-      begin
-        rxd_in = TEST_SFD_OK[i];
-        wait_clock_cycles(1);
-      end
-      
-      for (i = 1; i >= 0; i--)
-      begin
-        rxd_in = TEST_TYPE_OK[i];
-        wait_clock_cycles(1);
-      end
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_ERR,TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_ERR,TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_ERR, test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0); 
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b1); 
 
-      rxd_in = TEST_SIZE_OK;
-      wait_clock_cycles(1);
-      
-      for (i = SIZE-1; i >= 0; i--)
-      begin
-        rxd_in = TEST_PAYLOAD[i];
-        wait_clock_cycles(1);
-      end
-
-      rxd_in = TEST_FCS;
-      wait_clock_cycles(1);
-      rxdv_in = 1'b0;
-      
-      
-      
-
-      
+      wait_clock_cycles(10);
+      rxer_in = 1'b0;
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
 
 
-      // TODO: Implement stimulus logic to drive inputs
-      // Example:
-      // rxd_in = 8'hFF;
-      // rxdv_in = 1'b1;
-      // #10;
-      // rxdv_in = 1'b0;
-      // ...
-  
-      // TODO: Monitor the outputs and check expected behavior
-      // Example:
-      // if (tvalid_out == 1 && tdata_out == 8'hFF) begin
-      //   $display("Test passed");
-      // end else begin
-      //   $display("Test failed");
-      // end
-  
-      // End simulation after some time
-      #100 $finish;
+      #1000 $finish;
     end
 
     task wait_clock_cycles(input int cycles_to_wait);
         int i;
         for (i = 0; i < cycles_to_wait; i++) begin
-          @ (posedge clk_in);  // Wait for each positive edge of the clock
+          @ (posedge clk_in); 
         end
       endtask
 
@@ -138,26 +105,76 @@ module simple_rx_tb;
       wait_clock_cycles(3);
     endtask
 
+    task automatic send_packet(
+      input logic [7:0] test_sdf [3:0],   
+      input logic [7:0] test_type [1:0],  
+      input logic [7:0] test_size,        
+      input logic [7:0] test_fcs,
+      input logic test_rxer              
+  );
+      int i;
+      rxdv_in = 1'b1;
+  
+      for (i = 3; i >= 0; i--) begin
+          rxd_in = test_sdf[i];
+          wait_clock_cycles(1);
+      end
+  
+      for (i = 1; i >= 0; i--) begin
+          rxd_in = test_type[i];
+          wait_clock_cycles(1);
+      end
+  
+      rxer_in = test_rxer;
+      rxd_in = test_size;
+      wait_clock_cycles(1);
+  
+      generate_payload(test_payload);
+      for (i = SIZE-1; i >= 0; i--) begin
+          rxd_in = test_payload[i];
+          wait_clock_cycles(1);
+      end
+      
+  
+      rxd_in = calculate_checksum(TEST_TYPE_OK, TEST_SIZE_OK, test_payload) + test_fcs;
+      wait_clock_cycles(1);
+  
+      rxdv_in = 1'b0;
+      wait_clock_cycles(2);
+  endtask
+
+  task automatic generate_payload(
+    output logic [7:0] payload_array [SIZE-1:0]
+  );
+    for (int i = 0; i < SIZE; i++) begin
+        payload_array[i] = $urandom % 256;
+    end
+  endtask
+  
+
     function logic [7:0] calculate_checksum(
-        input logic [15:0] type_field,    
-        input logic [7:0] size_field,     
-        input logic [7:0] payload[]
-    );
-        logic [31:0] sum;  // Use a wider register to accumulate the sum
-        int i;
+      input logic [7:0] type_field[1:0],    
+      input logic [7:0] size_field,     
+      input logic [7:0] payload[SIZE-1:0]
+  );
+      logic [31:0] sum;
+      int i, n;
+  
+      sum = 0;
     
-        sum = 0;
-    
-        sum += type_field[15:8];  
-        sum += type_field[7:0];   
-        sum += size_field;
-    
-        for (i = 0; i < size_field; i++) begin
-            sum += payload[i];
-        end
-    
-        return sum[7:0];
-    endfunction
+      sum += size_field;
+      for (n = 0; n < 2; n++)
+      begin
+          sum += type_field[n];
+      end
+  
+      for (i = 0; i < SIZE; i++)
+      begin
+          sum += payload[i];
+      end
+  
+      return sum[7:0];
+  endfunction
       
   
   endmodule

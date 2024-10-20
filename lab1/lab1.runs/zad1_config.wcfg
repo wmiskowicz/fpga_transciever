@@ -11,15 +11,15 @@
       </db_ref>
    </db_ref_list>
    <zoom_setting>
-      <ZoomStartTime time="0.000 ns"></ZoomStartTime>
-      <ZoomEndTime time="255.684 ns"></ZoomEndTime>
-      <Cursor1Time time="126.667 ns"></Cursor1Time>
+      <ZoomStartTime time="0.280 ns"></ZoomStartTime>
+      <ZoomEndTime time="603.781 ns"></ZoomEndTime>
+      <Cursor1Time time="485.780 ns"></Cursor1Time>
    </zoom_setting>
    <column_width_setting>
-      <NameColumnWidth column_width="405"></NameColumnWidth>
+      <NameColumnWidth column_width="279"></NameColumnWidth>
       <ValueColumnWidth column_width="90"></ValueColumnWidth>
    </column_width_setting>
-   <WVObjectSize size="20" />
+   <WVObjectSize size="23" />
    <wvobject fp_name="/simple_rx_tb/clk_in" type="logic">
       <obj_property name="ElementShortName">clk_in</obj_property>
       <obj_property name="ObjectShortName">clk_in</obj_property>
@@ -27,6 +27,18 @@
    <wvobject fp_name="/simple_rx_tb/rst_n_in" type="logic">
       <obj_property name="ElementShortName">rst_n_in</obj_property>
       <obj_property name="ObjectShortName">rst_n_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simple_rx_tb/dut/output_controller_0/tdata_out" type="array">
+      <obj_property name="ElementShortName">tdata_out[7:0]</obj_property>
+      <obj_property name="ObjectShortName">tdata_out[7:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simple_rx_tb/rxer_in" type="logic">
+      <obj_property name="ElementShortName">rxer_in</obj_property>
+      <obj_property name="ObjectShortName">rxer_in</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simple_rx_tb/rxdv_in" type="logic">
+      <obj_property name="ElementShortName">rxdv_in</obj_property>
+      <obj_property name="ObjectShortName">rxdv_in</obj_property>
    </wvobject>
    <wvobject fp_name="/simple_rx_tb/stat_packet_vld_cnt" type="array">
       <obj_property name="ElementShortName">stat_packet_vld_cnt[15:0]</obj_property>
@@ -36,68 +48,68 @@
       <obj_property name="ElementShortName">stat_packet_err_cnt[15:0]</obj_property>
       <obj_property name="ObjectShortName">stat_packet_err_cnt[15:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_rx_fsm/data_buff" type="array">
-      <obj_property name="ElementShortName">data_buff[9:0][7:0]</obj_property>
-      <obj_property name="ObjectShortName">data_buff[9:0][7:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/rx_fsm_0/state" type="array">
+      <obj_property name="ElementShortName">state[31:0]</obj_property>
+      <obj_property name="ObjectShortName">state[31:0]</obj_property>
+   </wvobject>
+   <wvobject fp_name="/simple_rx_tb/dut/rx_fsm_0/write_ind" type="array">
+      <obj_property name="ElementShortName">write_ind[3:0]</obj_property>
+      <obj_property name="ObjectShortName">write_ind[3:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/simple_rx_tb/dut/wr_data" type="array">
-      <obj_property name="ElementShortName">wr_data[79:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_data[79:0]</obj_property>
+      <obj_property name="ElementShortName">wr_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_data[7:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/simple_rx_tb/dut/wr_addr" type="array">
-      <obj_property name="ElementShortName">wr_addr[7:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_addr[7:0]</obj_property>
+      <obj_property name="ElementShortName">wr_addr[3:0]</obj_property>
+      <obj_property name="ObjectShortName">wr_addr[3:0]</obj_property>
    </wvobject>
    <wvobject fp_name="/simple_rx_tb/dut/wr_enabl" type="logic">
       <obj_property name="ElementShortName">wr_enabl</obj_property>
       <obj_property name="ObjectShortName">wr_enabl</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/wr_addr" type="array">
-      <obj_property name="ElementShortName">wr_addr[7:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_addr[7:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/data_reg1" type="array">
+      <obj_property name="ElementShortName">data_reg1[9:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_reg1[9:0][7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/wr_data" type="array">
-      <obj_property name="ElementShortName">wr_data[79:0]</obj_property>
-      <obj_property name="ObjectShortName">wr_data[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/data_reg2" type="array">
+      <obj_property name="ElementShortName">data_reg2[9:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_reg2[9:0][7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/data_mem_inst/data_reg1" type="array">
-      <obj_property name="ElementShortName">data_reg1[79:0]</obj_property>
-      <obj_property name="ObjectShortName">data_reg1[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/data_reg3" type="array">
+      <obj_property name="ElementShortName">data_reg3[9:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_reg3[9:0][7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/data_mem_inst/data_reg2" type="array">
-      <obj_property name="ElementShortName">data_reg2[79:0]</obj_property>
-      <obj_property name="ObjectShortName">data_reg2[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/data_reg4" type="array">
+      <obj_property name="ElementShortName">data_reg4[9:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_reg4[9:0][7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/data_mem_inst/data_reg3" type="array">
-      <obj_property name="ElementShortName">data_reg3[79:0]</obj_property>
-      <obj_property name="ObjectShortName">data_reg3[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/rd_data" type="array">
+      <obj_property name="ElementShortName">rd_data[7:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_data[7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/data_mem_inst/data_reg4" type="array">
-      <obj_property name="ElementShortName">data_reg4[79:0]</obj_property>
-      <obj_property name="ObjectShortName">data_reg4[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/rd_addr" type="array">
+      <obj_property name="ElementShortName">rd_addr[3:0]</obj_property>
+      <obj_property name="ObjectShortName">rd_addr[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/rd_data" type="array">
-      <obj_property name="ElementShortName">rd_data[79:0]</obj_property>
-      <obj_property name="ObjectShortName">rd_data[79:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/data_mem_0/read_ind" type="array">
+      <obj_property name="ElementShortName">read_ind[3:0]</obj_property>
+      <obj_property name="ObjectShortName">read_ind[3:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/rd_addr" type="array">
-      <obj_property name="ElementShortName">rd_addr[7:0]</obj_property>
-      <obj_property name="ObjectShortName">rd_addr[7:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/rx_fsm_0/data_buff" type="array">
+      <obj_property name="ElementShortName">data_buff[9:0][7:0]</obj_property>
+      <obj_property name="ObjectShortName">data_buff[9:0][7:0]</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/tdata_out" type="array">
-      <obj_property name="ElementShortName">tdata_out[7:0]</obj_property>
-      <obj_property name="ObjectShortName">tdata_out[7:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/rx_fsm_0/packet_vld" type="logic">
+      <obj_property name="ElementShortName">packet_vld</obj_property>
+      <obj_property name="ObjectShortName">packet_vld</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/byte_counter" type="array">
-      <obj_property name="ElementShortName">byte_counter[3:0]</obj_property>
-      <obj_property name="ObjectShortName">byte_counter[3:0]</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/rx_fsm_0/packet_err" type="logic">
+      <obj_property name="ElementShortName">packet_err</obj_property>
+      <obj_property name="ObjectShortName">packet_err</obj_property>
    </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/tdata_out" type="array">
-      <obj_property name="ElementShortName">tdata_out[7:0]</obj_property>
-      <obj_property name="ObjectShortName">tdata_out[7:0]</obj_property>
-   </wvobject>
-   <wvobject fp_name="/simple_rx_tb/dut/u_output_controller/tvalid_out" type="logic">
-      <obj_property name="ElementShortName">tvalid_out</obj_property>
-      <obj_property name="ObjectShortName">tvalid_out</obj_property>
+   <wvobject fp_name="/simple_rx_tb/dut/output_controller_0/rd_enabl" type="logic">
+      <obj_property name="ElementShortName">rd_enabl</obj_property>
+      <obj_property name="ObjectShortName">rd_enabl</obj_property>
    </wvobject>
 </wave_config>
