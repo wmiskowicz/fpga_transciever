@@ -111,8 +111,4 @@ module simple_rx #(
     .tready_in (tready_in)
   );
   
-  
-  
-
- 
 endmodule 

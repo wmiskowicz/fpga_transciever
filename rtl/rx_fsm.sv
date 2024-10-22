@@ -11,7 +11,7 @@ module rx_fsm#(
     input  logic              rst_n_in,
 
     // data input 
-    input  logic  [ 7: 0]     rxd_in, 
+    input  logic  [7:0]       rxd_in, 
     input  logic              rxdv_in, 
     input  logic              rxer_in,
     
@@ -20,7 +20,7 @@ module rx_fsm#(
     output logic  [15: 0]     stat_packet_err_cnt,
 
     // write data
-    output  logic [79:0]               wr_data, 
+    output  logic [7:0]                wr_data, 
     output  logic [7:0]                wr_addr, 
     output  logic                      wr_enabl
 );
@@ -40,6 +40,7 @@ logic [7:0] sdf_buff [3:0];
 logic [7:0] size_buff, fcs_buff;
 logic [7:0] checksum;
 logic packet_vld, packet_err;
+logic rdv_prev;
 
 
 
@@ -57,6 +58,7 @@ always_ff @(posedge clk_in)
         wr_enabl <= 1'b0;
         wr_addr  <= '0;
         wr_data <= '0;
+        rdv_prev <= '0;
     end
     else
     begin
@@ -74,7 +76,8 @@ always_ff @(posedge clk_in)
                     state <= IDLE;
                     write_ind <= '0;
                 end      
-                wr_enabl <= 1'b0;    
+                wr_enabl <= 1'b0;  
+                rdv_prev <= '0;  
             end
             PCK_SFD:  
             begin
@@ -163,6 +166,7 @@ always_ff @(posedge clk_in)
                 wr_enabl <= '0;
                 wr_data  <= '0; 
                 wr_addr  <= wr_addr + 8'h2;
+                rdv_prev <= rxdv_in;
             end
             PCK_ERR:
             begin
@@ -183,8 +187,8 @@ always_ff @(posedge clk_in)
                 packet_vld <= 1'b0;
                 packet_err <= 1'b0;
                 wr_enabl <= 1'b0;
-                wr_data <= '0;
-                state <= rxdv_in ? PCK_WAIT : IDLE;
+                wr_data <= 1'b0;
+                state <= (rdv_prev == 0) ? IDLE : PCK_WAIT;
             end
             default:  state <= IDLE;
         endcase

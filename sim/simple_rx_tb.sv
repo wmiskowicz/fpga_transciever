@@ -140,7 +140,7 @@ module simple_rx_tb;
       wait_clock_cycles(1);
   
       rxdv_in = 1'b0;
-      wait_clock_cycles(2);
+      wait_clock_cycles(1);
   endtask
 
   task automatic generate_payload(
