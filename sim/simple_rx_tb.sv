@@ -2,9 +2,7 @@ module simple_rx_tb;
 
     // Parameters
     parameter int G_MEM_SIZE = 512;
-    parameter int CLK_FREQ = 100_000_000; 
     parameter int CLK_PERIOD = 5ns; 
-    parameter SIZE = 10;
     int i;
 
     // Packet data
@@ -17,7 +15,7 @@ module simple_rx_tb;
     logic [7:0] TEST_SIZE_OK  = 8'hA; //min 0x8
     logic [7:0] TEST_SIZE_ERR = 8'h3;
 
-    logic [7:0] test_payload [SIZE-1:0] = '{8'h11, 8'h22, 8'h33, 8'h44, 8'h55, 8'h66, 8'h77, 8'h88, 8'h99, 8'haa}; 
+    logic [7:0] test_payload [] = '{8'h11, 8'h22, 8'h33, 8'h44, 8'h55, 8'h66, 8'h77, 8'h88, 8'h99, 8'haa}; 
     logic [7:0] test_fcs_ok = '0;    
     logic [7:0] test_fcs_err = '1;    
 
@@ -74,18 +72,18 @@ module simple_rx_tb;
       i = 0;
 
       init_reset();
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_ERR,TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_OK, TEST_TYPE_ERR,TEST_SIZE_OK,  test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_ERR, test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0); 
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b1); 
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok,  1'b0);
+      send_packet(TEST_SFD_ERR,TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok,  1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_ERR,TEST_SIZE_OK,  test_fcs_ok,  1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_ERR, test_fcs_ok,  1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_err, 1'b0); 
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok,  1'b1); 
 
       wait_clock_cycles(10);
       rxer_in = 1'b0;
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
-      send_packet(TEST_SFD_OK, TEST_TYPE_OK, TEST_SIZE_OK,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, 12,  test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, 9,   test_fcs_ok, 1'b0);
+      send_packet(TEST_SFD_OK, TEST_TYPE_OK, 15,  test_fcs_ok, 1'b0);
 
 
       #1000 $finish;
@@ -129,14 +127,14 @@ module simple_rx_tb;
       rxd_in = test_size;
       wait_clock_cycles(1);
   
-      generate_payload(test_payload);
-      for (i = SIZE-1; i >= 0; i--) begin
+      generate_payload(test_size, test_payload);
+      for (i = test_size-1; i >= 0; i--) begin
           rxd_in = test_payload[i];
           wait_clock_cycles(1);
       end
       
   
-      rxd_in = calculate_checksum(TEST_TYPE_OK, TEST_SIZE_OK, test_payload) + test_fcs;
+      rxd_in = calculate_checksum(test_type, test_size, {test_payload[test_size-1], test_payload[test_size-2], test_payload[test_size-3], test_payload[test_size-4]}) + test_fcs;
       wait_clock_cycles(1);
   
       rxdv_in = 1'b0;
@@ -144,37 +142,36 @@ module simple_rx_tb;
   endtask
 
   task automatic generate_payload(
-    output logic [7:0] payload_array [SIZE-1:0]
+    input  logic [7:0] size,
+    output logic [7:0] payload_array [100]
   );
-    for (int i = 0; i < SIZE; i++) begin
+    for (int i = 0; i < size; i++) begin
         payload_array[i] = $urandom % 256;
     end
   endtask
   
 
-    function logic [7:0] calculate_checksum(
-      input logic [7:0] type_field[1:0],    
-      input logic [7:0] size_field,     
-      input logic [7:0] payload[SIZE-1:0]
-  );
-      logic [31:0] sum;
-      int i, n;
+  function logic [7:0] calculate_checksum(
+    input logic [7:0] type_field[1:0],    
+    input logic [7:0] size_field,     
+    input logic [31:0] payload
+);
+    logic [31:0] sum;
+    int i, n;
+
+    sum = 0;
   
-      sum = 0;
+    sum += size_field;
+    for (n = 0; n < 2; n++)
+    begin
+        sum += type_field[n];
+    end
+
+    // sum += payload;
     
-      sum += size_field;
-      for (n = 0; n < 2; n++)
-      begin
-          sum += type_field[n];
-      end
-  
-      for (i = 0; i < SIZE; i++)
-      begin
-          sum += payload[i];
-      end
-  
-      return sum[7:0];
-  endfunction
+
+    return sum[7:0];
+endfunction
       
   
   endmodule
