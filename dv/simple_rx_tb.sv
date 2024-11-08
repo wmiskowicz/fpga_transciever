@@ -1,7 +1,7 @@
 module simple_rx_tb;
 
     // Parameters
-    parameter int G_MEM_SIZE = 512;
+    parameter int G_MEM_SIZE = 100;
     parameter int CLK_PERIOD = 5ns; 
     int i;
 
@@ -89,6 +89,14 @@ module simple_rx_tb;
       #1000 $finish;
     end
 
+    always @(posedge clk_in) begin
+      if ($urandom_range(1, 10) <= 9) begin
+        tready_in <= 1; 
+      end else begin
+        tready_in  <= 0;
+      end
+    end
+
     task wait_clock_cycles(input int cycles_to_wait);
         int i;
         for (i = 0; i < cycles_to_wait; i++) begin
@@ -134,7 +142,7 @@ module simple_rx_tb;
       end
       
   
-      rxd_in = calculate_checksum(test_type, test_size, {test_payload[test_size-1], test_payload[test_size-2], test_payload[test_size-3], test_payload[test_size-4]}) + test_fcs;
+      rxd_in = calculate_checksum({test_type[0], test_type[1]}, test_size, {test_payload[test_size-1], test_payload[test_size-2], test_payload[test_size-3], test_payload[test_size-4]}) + test_fcs;
       wait_clock_cycles(1);
   
       rxdv_in = 1'b0;
@@ -152,7 +160,7 @@ module simple_rx_tb;
   
 
   function logic [7:0] calculate_checksum(
-    input logic [7:0] type_field[1:0],    
+    input logic [15:0] type_field,    
     input logic [7:0] size_field,     
     input logic [31:0] payload
 );
@@ -162,12 +170,14 @@ module simple_rx_tb;
     sum = 0;
   
     sum += size_field;
-    for (n = 0; n < 2; n++)
-    begin
-        sum += type_field[n];
-    end
+    sum += type_field[15:8];
+    sum += type_field[7:0];
+    
 
-    // sum += payload;
+    sum += payload[31:24];
+    sum += payload[23:16];
+    sum += payload[15:8];
+    sum += payload[7:0];
     
 
     return sum[7:0];
