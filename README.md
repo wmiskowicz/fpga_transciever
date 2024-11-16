@@ -1,5 +1,5 @@
-FPGA transciever
-Autror: Wojciech Miskowicz
+FPGA transciever  
+Author: Wojciech Miskowicz  
 Date: 16 Nov 2024
 
 This project aims for showing advanced testing methods. 
